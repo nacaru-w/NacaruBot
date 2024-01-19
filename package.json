@@ -5,7 +5,8 @@
   "main": "built/bot.js",
   "scripts": {
     "test": "test",
-    "start": "node built/bot.js"
+    "compile": "tsc",
+    "start": "npm run compile && node built/bot.js"
   },
   "author": "",
   "license": "GPL 3.0",
