@@ -162,7 +162,7 @@ const dateLinkeRemoverControlPanel = (async () => {
 
     async function editArticle(article: string): Promise<void> {
 
-        const message = ora(`Editing: ${article}...`).start();
+        const message = ora(`Editing: ${article}`).start();
         try {
             await bot.save(
                 article,
@@ -174,12 +174,6 @@ const dateLinkeRemoverControlPanel = (async () => {
             message.fail(`Fail: ${article}.The following error happened: ${error}`);
         }
     }
-
-    // function wait(ms) {
-    //     return new Promise(resolve => {
-    //         setTimeout(resolve, ms);
-    //     });
-    // }
 
     async function submit(): Promise<void> {
         articlesFound = 0;
