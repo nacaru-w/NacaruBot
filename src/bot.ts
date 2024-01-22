@@ -20,6 +20,7 @@ const dateLinkeRemoverControlPanel = (async () => {
     let articleList: string[];
     let articleDict: ArticleDict;
     let articlesFound: number = 0;
+    let exceptions: string[];
 
     const calendarCategories: string[] = ['[[Categoría:Anexos:Tablas anuales', "[[Categoría:Calendario"];
 
@@ -28,6 +29,7 @@ const dateLinkeRemoverControlPanel = (async () => {
     const { Mwn } = require('mwn');
 
     const fs = require('node:fs/promises');
+    const ora = require('ora');
 
 
     const credentials = await fs.readFile('./credentials.json').then((data: string) => {
@@ -53,7 +55,7 @@ const dateLinkeRemoverControlPanel = (async () => {
     console.log('Loading date-link-remover control panel');
 
     function getContent(pageName: string): Promise<string> {
-        let params: QueryParams = {
+        const params: QueryParams = {
             action: 'query',
             prop: 'revisions',
             titles: pageName,
@@ -72,10 +74,15 @@ const dateLinkeRemoverControlPanel = (async () => {
         return botPromise;
     }
 
+    async function getExceptions(): Promise<string[]> {
+        const JSONList = await getContent('Usuario:NacaruBot/date-link-remover-control-panel/exceptions.json');
+        return JSON.parse(JSONList);
+    }
+
     async function genArticleList(): Promise<string[]> {
-        bar1.start(5, 0);
+        bar1.start(100, 0);
         let promises: Promise<string>[] = [];
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 100; i++) {
             promises.push(genArticle())
         }
         let result: string[] = await Promise.all(promises);
@@ -115,6 +122,7 @@ const dateLinkeRemoverControlPanel = (async () => {
                 if (useRegex || usePipeRegex || useTemplateRegex) {
                     selectedArticle = article;
                     articleDict[selectedArticle!] = {
+                        text: content,
                         regexEval: useRegex,
                         pipeRegexEval: usePipeRegex,
                         templateRegexEval: useTemplateRegex,
@@ -130,23 +138,63 @@ const dateLinkeRemoverControlPanel = (async () => {
 
     }
 
+    function makeRegexGlobal(expression: RegExp): RegExp {
+        return new RegExp(expression, "gi");
+    }
+
+    function replaceText(article: string): string {
+        let newText: string = articleDict.article.text;
+        if (articleDict.article.regexEval) {
+            const newRegex = makeRegexGlobal(regex);
+            newText = newText.replace(newRegex, "$1");
+        }
+        if (articleDict.article.pipeRegexEval) {
+            const newPipeRegex = makeRegexGlobal(pipeRegex);
+            newText = newText.replace(newPipeRegex, "$2");
+        }
+        if (articleDict.article.templateRegexEval) {
+            const newTemplateRegex = makeRegexGlobal(templateRegex);
+            newText = newText.replace(newTemplateRegex, "$1$2");
+        }
+        return newText;
+    }
+
+    async function editArticle(article: string, message: any): Promise<void> {
+        const params: QueryParams = {
+            action: 'edit',
+            format: 'json',
+            text: replaceText(article),
+            summary: 'Bot: eliminando enlaces según [[WP:ENLACESFECHAS]]',
+            bot: true,
+            minor: false,
+            token: 'crsf'
+        }
+
+        try {
+            await bot.request(params);
+            message.succeed('Success');
+        } catch (error) {
+            message.fail(`The following error happened: ${error}`);
+        }
+    }
+
     // function wait(ms) {
     //     return new Promise(resolve => {
     //         setTimeout(resolve, ms);
     //     });
     // }
 
-    function submit(): void {
+    async function submit(): Promise<void> {
         articleDict = {};
+        exceptions = await getExceptions();
         console.log('Loading articles...');
+        articleList = await genArticleList();
 
-        genArticleList().then((result) => {
-            articleList = result;
-            console.log('Found the following articles:')
-            for (let article of articleList) {
-                console.log(`* ${article}`);
-            }
-        })
+        console.log('Found 100 articles, working on removing dates...')
+        for (let article of articleList) {
+            const message = ora(`Working on article: ${article}...`).start();
+            await editArticle(article, message);
+        }
     }
 
     (async () => {

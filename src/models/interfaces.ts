@@ -9,12 +9,18 @@ export interface QueryParams {
     rvprop?: string,
     rvslots?: string,
     formatversion?: string,
+    bot?: boolean,
+    summary?: string,
+    text?: string,
+    minor?: boolean,
+    token?: string
 }
 
 export interface ArticleDict {
     [articleName: string]: {
-        regexEval: boolean;
-        pipeRegexEval: boolean;
-        templateRegexEval: boolean;
+        text: string,
+        regexEval: boolean,
+        pipeRegexEval: boolean,
+        templateRegexEval: boolean
     }
 }

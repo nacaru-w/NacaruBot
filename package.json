@@ -6,15 +6,18 @@
   "scripts": {
     "test": "test",
     "compile": "tsc",
-    "start": "npm run compile && node built/bot.js"
+    "start": "npm run compile && node built/bot.js",
+    "bot": "node built/bot.js"
   },
   "author": "",
   "license": "GPL 3.0",
   "dependencies": {
     "cli-progress": "^3.12.0",
-    "mwn": "^2.0.2"
+    "mwn": "^2.0.2",
+    "ora": "^3.4.0"
   },
   "devDependencies": {
+    "@types/ora": "^3.2.0",
     "typescript": "^5.3.3"
   }
 }
