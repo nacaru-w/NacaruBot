@@ -1,6 +1,7 @@
 export interface QueryParams {
     action: string,
     format: string,
+    title?: string,
     list?: string
     rnnamespace?: string,
     rnlimit?: string,

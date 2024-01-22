@@ -143,26 +143,29 @@ const dateLinkeRemoverControlPanel = (async () => {
     }
 
     function replaceText(article: string): string {
-        let newText: string = articleDict.article.text;
-        if (articleDict.article.regexEval) {
+        let newText: string = articleDict[article].text;
+        if (articleDict[article].regexEval) {
             const newRegex = makeRegexGlobal(regex);
             newText = newText.replace(newRegex, "$1");
         }
-        if (articleDict.article.pipeRegexEval) {
+        if (articleDict[article].pipeRegexEval) {
             const newPipeRegex = makeRegexGlobal(pipeRegex);
             newText = newText.replace(newPipeRegex, "$2");
         }
-        if (articleDict.article.templateRegexEval) {
+        if (articleDict[article].templateRegexEval) {
             const newTemplateRegex = makeRegexGlobal(templateRegex);
             newText = newText.replace(newTemplateRegex, "$1$2");
         }
         return newText;
     }
 
-    async function editArticle(article: string, message: any): Promise<void> {
+    async function editArticle(article: string): Promise<void> {
+        const message = ora(`Working on article: ${article}...`).start();
+
         const params: QueryParams = {
             action: 'edit',
             format: 'json',
+            title: article,
             text: replaceText(article),
             summary: 'Bot: eliminando enlaces según [[WP:ENLACESFECHAS]]',
             bot: true,
@@ -192,8 +195,7 @@ const dateLinkeRemoverControlPanel = (async () => {
 
         console.log('Found 100 articles, working on removing dates...')
         for (let article of articleList) {
-            const message = ora(`Working on article: ${article}...`).start();
-            await editArticle(article, message);
+            await editArticle(article);
         }
     }
 
