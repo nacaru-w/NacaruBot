@@ -105,8 +105,9 @@ const dateLinkeRemoverControlPanel = (async () => {
             const article = result.query.random[0].title;
 
             const calendarArticle = titleRegex.test(article);
+            const isException = exceptions.some(e => article == e);
 
-            if (calendarArticle) {
+            if (calendarArticle || isException) {
                 continue;
             }
 
@@ -160,24 +161,17 @@ const dateLinkeRemoverControlPanel = (async () => {
     }
 
     async function editArticle(article: string): Promise<void> {
+
         const message = ora(`Working on article: ${article}...`).start();
-
-        const params: QueryParams = {
-            action: 'edit',
-            format: 'json',
-            title: article,
-            text: replaceText(article),
-            summary: 'Bot: eliminando enlaces según [[WP:ENLACESFECHAS]]',
-            bot: true,
-            minor: false,
-            token: 'crsf'
-        }
-
         try {
-            await bot.request(params);
-            message.succeed('Success');
+            await bot.save(
+                article,
+                replaceText(article),
+                'Bot: eliminando enlaces según [[WP:ENLACESFECHAS]]'
+            );
+            message.succeed(`Success: ${article}`);
         } catch (error) {
-            message.fail(`The following error happened: ${error}`);
+            message.fail(`Fail: ${article}.The following error happened: ${error}`);
         }
     }
 
