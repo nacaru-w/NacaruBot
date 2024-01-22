@@ -19,7 +19,7 @@ const dateLinkeRemoverControlPanel = (async () => {
 
     let articleList: string[];
     let articleDict: ArticleDict;
-    let articlesFound: number = 0;
+    let articlesFound: number;
     let exceptions: string[];
 
     const calendarCategories: string[] = ['[[Categoría:Anexos:Tablas anuales', "[[Categoría:Calendario"];
@@ -162,7 +162,7 @@ const dateLinkeRemoverControlPanel = (async () => {
 
     async function editArticle(article: string): Promise<void> {
 
-        const message = ora(`Working on article: ${article}...`).start();
+        const message = ora(`Editing: ${article}...`).start();
         try {
             await bot.save(
                 article,
@@ -182,6 +182,7 @@ const dateLinkeRemoverControlPanel = (async () => {
     // }
 
     async function submit(): Promise<void> {
+        articlesFound = 0;
         articleDict = {};
         exceptions = await getExceptions();
         console.log('Loading articles...');
@@ -191,6 +192,7 @@ const dateLinkeRemoverControlPanel = (async () => {
         for (let article of articleList) {
             await editArticle(article);
         }
+        submit();
     }
 
     (async () => {
