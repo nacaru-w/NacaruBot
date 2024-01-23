@@ -22,7 +22,7 @@ const dateLinkeRemoverControlPanel = (async () => {
     let articlesFound: number;
     let exceptions: string[];
 
-    const calendarCategories: string[] = ['[[Categoría:Anexos:Tablas anuales', "[[Categoría:Calendario", "[[Categoría:Celebraciones del día"];
+    const calendarCategories: string[] = ['[[Categoría:Anexos:Tablas anuales', "[[Categoría:Calendario", "[[Categoría:Celebraciones del día", "[[Categoría:Efemérides no oficiales"];
 
     const cliProgress = require('cli-progress');
     const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
