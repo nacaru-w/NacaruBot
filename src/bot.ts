@@ -22,7 +22,7 @@ const dateLinkeRemoverControlPanel = (async () => {
     let articlesFound: number;
     let exceptions: string[];
 
-    const calendarCategories: string[] = ['[[Categoría:Anexos:Tablas anuales', "[[Categoría:Calendario"];
+    const calendarCategories: string[] = ['[[Categoría:Anexos:Tablas anuales', "[[Categoría:Calendario", "[[Categoría:Celebraciones del día"];
 
     const cliProgress = require('cli-progress');
     const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -161,7 +161,6 @@ const dateLinkeRemoverControlPanel = (async () => {
     }
 
     async function editArticle(article: string): Promise<void> {
-
         const message = ora(`Editing: ${article}`).start();
         try {
             await bot.save(
