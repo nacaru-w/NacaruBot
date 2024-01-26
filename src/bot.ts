@@ -46,92 +46,7 @@ const dateLinkeRemoverControlPanel = (async () => {
         }
     });
 
-    console.log('Loading date-link-remover control panel');
-
-    // function getContent(pageName: string): Promise<string> {
-    //     const params: QueryParams = {
-    //         action: 'query',
-    //         prop: 'revisions',
-    //         titles: pageName,
-    //         rvprop: 'content',
-    //         rvslots: 'main',
-    //         formatversion: '2',
-    //         format: 'json'
-    //     };
-
-    //     let botPromise = bot.request(params).then(
-    //         ((data: any) => {
-    //             return data.query.pages[0].revisions[0].slots?.main?.content
-    //         })
-    //     );
-
-    //     return botPromise;
-    // }
-
-    // async function getExceptions(): Promise<string[]> {
-    //     const JSONList = await getContent('Usuario:NacaruBot/date-link-remover-control-panel/exceptions.json');
-    //     return JSON.parse(JSONList);
-    // }
-
-    // async function genArticleList(): Promise<string[]> {
-    //     bar1.start(100, 0);
-    //     let promises: Promise<string>[] = [];
-    //     for (let i = 0; i < 100; i++) {
-    //         promises.push(genArticle())
-    //     }
-    //     let result: string[] = await Promise.all(promises);
-    //     bar1.stop();
-    //     return result.flat(1);
-    // }
-
-    // async function genArticle(): Promise<string> {
-    //     let selectedArticle: null | string = null;
-    //     const params: QueryParams = {
-    //         action: 'query',
-    //         format: 'json',
-    //         list: 'random',
-    //         rnnamespace: '0|104',
-    //         rnlimit: '1',
-    //     };
-
-    //     while (selectedArticle === null) {
-    //         const result = await bot.request(params);
-    //         const article = result.query.random[0].title;
-
-    //         const calendarArticle = titleRegex.test(article);
-    //         const isException = exceptions.some(e => article == e);
-
-    //         if (calendarArticle || isException) {
-    //             continue;
-    //         }
-
-    //         const content = await getContent(article);
-
-    //         const hasCalendarCategory = calendarCategories.some(e => content.includes(e));
-
-    //         if (!hasCalendarCategory) {
-    //             const useRegex = regex.test(content);
-    //             const usePipeRegex = pipeRegex.test(content);
-    //             const useTemplateRegex = templateRegex.test(content);
-
-    //             if (useRegex || usePipeRegex || useTemplateRegex) {
-    //                 selectedArticle = article;
-    //                 articleDict[selectedArticle!] = {
-    //                     text: content,
-    //                     regexEval: useRegex,
-    //                     pipeRegexEval: usePipeRegex,
-    //                     templateRegexEval: useTemplateRegex,
-    //                 };
-    //             }
-    //         }
-    //     }
-
-    //     articlesFound++;
-    //     bar1.update(articlesFound);
-
-    //     return selectedArticle;
-
-    // }
+    console.log('Loading date-link-remover bot panel');
 
     async function genArticles(): Promise<void> {
         let params: QueryParams = {
@@ -157,7 +72,7 @@ const dateLinkeRemoverControlPanel = (async () => {
 
     async function sanitiseArticle(article: string): Promise<string | null> {
         if (titleRegex.test(article)) {
-            return null
+            return null;
         }
         if (exceptions.some(e => article == e)) {
             return null;
@@ -183,9 +98,7 @@ const dateLinkeRemoverControlPanel = (async () => {
 
             return article;
         }
-
-        return null
-
+        return null;
     }
 
     async function sanitiseArray(): Promise<void> {
