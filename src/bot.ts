@@ -1,11 +1,3 @@
-//<nowiki>
-
-/** 
- * Este script solo debe de ser utilizado por bots. Si posees un bot y estás interesado en implementarlo, por favor contacta con el autor (Nacaru).
- * 
- * Este código está liberado bajo la licencia GPL-3.0 (según se estipula en su repositorio original en https://github.com/nacaru-w/date-link-remover).
- */
-
 import { regex, pipeRegex, templateRegex, titleRegex } from './regexes/regexes';
 import { ArticleDict, QueryParams } from './models/interfaces';
 import { categories } from './categories/categories';
@@ -211,5 +203,3 @@ const dateLinkeRemoverControlPanel = (async () => {
     })();
 
 })();
-
-//</nowiki>
