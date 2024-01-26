@@ -6,23 +6,17 @@
  * Este código está liberado bajo la licencia GPL-3.0 (según se estipula en su repositorio original en https://github.com/nacaru-w/date-link-remover).
  */
 
-import { QueryParams, ArticleDict } from './models/interfaces'
+import { regex, pipeRegex, templateRegex, titleRegex } from './regexes/regexes';
+import { ArticleDict, QueryParams } from './models/interfaces';
+import { categories } from './categories/categories';
+
 
 const dateLinkeRemoverControlPanel = (async () => {
-    // Regexes variables
-    const regex = /\[\[\s*((?:(?:0?[1-9]|[12]\d|3[01])º?\sde\s)?(?:(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)(?:\sde\s[1-9]\d{0,3})?)|(?:lunes|martes|miércoles|jueves|viernes|sábado|domingo)|(?:(?:años?|década de)\s)?(?:[1-9]\d{0,3}|siglo(?:\s|&nbsp;)*\w+)(?:(?:\s|&nbsp;)*(?:a|d)\.(?:\s|&nbsp;)*C\.)?)\s*\]\]/i;
-    const pipeRegex = /\[\[\s*((?:(?:0?[1-9]|[12]\d|3[01])º?\sde\s)?(?:(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)(?:\sde\s[1-9]\d{0,3})?)|(?:lunes|martes|miércoles|jueves|viernes|sábado|domingo)|(?:(?:años?|década de)\s)?(?:[1-9]\d{0,3}|siglo(?:\s|&nbsp;)*\w+)(?:(?:\s|&nbsp;)*(?:a|d)\.(?:\s|&nbsp;)*C\.)?)(?:\s*\|([^\]]*))\s*\]\]/i;
-    const templateRegex = /(\{\{(?:siglo|(?:Julgreg)?fecha)[^\}]+)(?:\|1|\|Link\s*=\s*(?:\"true\"|(?:s[ií]|pt)))\s*(\}\})/i;
-
-    // This one is so that the function that finds the articles can discard them if they're within the calendar-related scope
-    const titleRegex = /^((?:(?:0?[1-9]|[12]\d|3[01])º? de |Anexo:[\dA-Za-zÀ-ÖØ-öø-ÿ\-\(\) ]+ en )?(?:(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|año|día|mes)?(?:(?: de )?[1-9]\d{0,3})?)|(?:(?:Anexo:)?(?:Cronología|Día|Mes|Década|Siglo) de[\dA-Za-zÀ-ÖØ-öø-ÿ\-\(\) ]+)|(?:(?:Anexo:)?(Años?|Día (?:mundial|(?:inter)?nacional)) [\dA-Za-zÀ-ÖØ-öø-ÿ\-\(\) ]+)|(?:(Calendario|Semana) [\dA-Za-zÀ-ÖØ-öø-ÿ\-\(\) ]+)|(?:lunes|martes|miércoles|jueves|viernes|sábado|domingo)|(?:(?:años?|década de)\s)?(?:[1-9]\d{0,3}(?: \(desambiguación\))?|siglo(?:\s|&nbsp;)*\w+)(?:(?:\s|&nbsp;)*(?:a|d)\.(?:\s|&nbsp;)*C\.)?)$/i;
-
-    let articleList: string[];
-    let articleDict: ArticleDict;
-    let articlesFound: number;
-    let exceptions: string[];
-
-    const calendarCategories: string[] = ['[[Categoría:Anexos:Tablas anuales', "[[Categoría:Calendario", "[[Categoría:Celebraciones del día", "[[Categoría:Efemérides no oficiales", "[[Categoría:Días"];
+    let articleArray: string[] = [];
+    let sanitisedArray: (string | null)[] = [];
+    let rncontinue: string = '';
+    let exceptions: string[] = [];
+    let articleDict: ArticleDict = {};
 
     const cliProgress = require('cli-progress');
     const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -54,7 +48,164 @@ const dateLinkeRemoverControlPanel = (async () => {
 
     console.log('Loading date-link-remover control panel');
 
-    function getContent(pageName: string): Promise<string> {
+    // function getContent(pageName: string): Promise<string> {
+    //     const params: QueryParams = {
+    //         action: 'query',
+    //         prop: 'revisions',
+    //         titles: pageName,
+    //         rvprop: 'content',
+    //         rvslots: 'main',
+    //         formatversion: '2',
+    //         format: 'json'
+    //     };
+
+    //     let botPromise = bot.request(params).then(
+    //         ((data: any) => {
+    //             return data.query.pages[0].revisions[0].slots?.main?.content
+    //         })
+    //     );
+
+    //     return botPromise;
+    // }
+
+    // async function getExceptions(): Promise<string[]> {
+    //     const JSONList = await getContent('Usuario:NacaruBot/date-link-remover-control-panel/exceptions.json');
+    //     return JSON.parse(JSONList);
+    // }
+
+    // async function genArticleList(): Promise<string[]> {
+    //     bar1.start(100, 0);
+    //     let promises: Promise<string>[] = [];
+    //     for (let i = 0; i < 100; i++) {
+    //         promises.push(genArticle())
+    //     }
+    //     let result: string[] = await Promise.all(promises);
+    //     bar1.stop();
+    //     return result.flat(1);
+    // }
+
+    // async function genArticle(): Promise<string> {
+    //     let selectedArticle: null | string = null;
+    //     const params: QueryParams = {
+    //         action: 'query',
+    //         format: 'json',
+    //         list: 'random',
+    //         rnnamespace: '0|104',
+    //         rnlimit: '1',
+    //     };
+
+    //     while (selectedArticle === null) {
+    //         const result = await bot.request(params);
+    //         const article = result.query.random[0].title;
+
+    //         const calendarArticle = titleRegex.test(article);
+    //         const isException = exceptions.some(e => article == e);
+
+    //         if (calendarArticle || isException) {
+    //             continue;
+    //         }
+
+    //         const content = await getContent(article);
+
+    //         const hasCalendarCategory = calendarCategories.some(e => content.includes(e));
+
+    //         if (!hasCalendarCategory) {
+    //             const useRegex = regex.test(content);
+    //             const usePipeRegex = pipeRegex.test(content);
+    //             const useTemplateRegex = templateRegex.test(content);
+
+    //             if (useRegex || usePipeRegex || useTemplateRegex) {
+    //                 selectedArticle = article;
+    //                 articleDict[selectedArticle!] = {
+    //                     text: content,
+    //                     regexEval: useRegex,
+    //                     pipeRegexEval: usePipeRegex,
+    //                     templateRegexEval: useTemplateRegex,
+    //                 };
+    //             }
+    //         }
+    //     }
+
+    //     articlesFound++;
+    //     bar1.update(articlesFound);
+
+    //     return selectedArticle;
+
+    // }
+
+    async function genArticles(): Promise<void> {
+        let params: QueryParams = {
+            action: 'query',
+            format: 'json',
+            list: 'random',
+            rnnamespace: '0|104',
+            rnlimit: '500',
+        };
+
+        if (rncontinue) {
+            params.rncontinue = rncontinue;
+        }
+
+        const result = await bot.request(params);
+        const randoms = result.query.random
+        for (let r in randoms) {
+            articleArray.push(randoms[r].title)
+        }
+
+        rncontinue = result.continue?.rncontinue;
+    }
+
+    async function sanitiseArticle(article: string): Promise<string | null> {
+        if (titleRegex.test(article)) {
+            return null
+        }
+        if (exceptions.some(e => article == e)) {
+            return null;
+        }
+
+        const content = await getContent(article);
+
+        if (categories.some(e => content.includes(e))) {
+            return null;
+        }
+
+        const useRegex = regex.test(content);
+        const usePipeRegex = pipeRegex.test(content);
+        const useTemplateRegex = templateRegex.test(content);
+
+        if (useRegex || usePipeRegex || useTemplateRegex) {
+            articleDict[article] = {
+                text: content,
+                regexEval: useRegex,
+                pipeRegexEval: usePipeRegex,
+                templateRegexEval: useTemplateRegex,
+            };
+
+            return article;
+        }
+
+        return null
+
+    }
+
+    async function sanitiseArray(): Promise<void> {
+        let results;
+        let promiseArray = [];
+
+        for (let article of articleArray) {
+            promiseArray.push(sanitiseArticle(article));
+        }
+
+        results = await Promise.all(promiseArray);
+        let finalResult = results.flat(1);
+        let filteredFinalResult = finalResult.filter((element) => element != null)
+        for (let a of filteredFinalResult) {
+            sanitisedArray.push(a);
+        }
+
+    }
+
+    async function getContent(pageName: string): Promise<string> {
         const params: QueryParams = {
             action: 'query',
             prop: 'revisions',
@@ -75,68 +226,9 @@ const dateLinkeRemoverControlPanel = (async () => {
     }
 
     async function getExceptions(): Promise<string[]> {
+        console.log("Loading exceptions...")
         const JSONList = await getContent('Usuario:NacaruBot/date-link-remover-control-panel/exceptions.json');
         return JSON.parse(JSONList);
-    }
-
-    async function genArticleList(): Promise<string[]> {
-        bar1.start(100, 0);
-        let promises: Promise<string>[] = [];
-        for (let i = 0; i < 100; i++) {
-            promises.push(genArticle())
-        }
-        let result: string[] = await Promise.all(promises);
-        bar1.stop();
-        return result.flat(1);
-    }
-
-    async function genArticle(): Promise<string> {
-        let selectedArticle: null | string = null;
-        const params: QueryParams = {
-            action: 'query',
-            format: 'json',
-            list: 'random',
-            rnnamespace: '0|104',
-            rnlimit: '1'
-        };
-
-        while (selectedArticle === null) {
-            const result = await bot.request(params);
-            const article = result.query.random[0].title;
-
-            const calendarArticle = titleRegex.test(article);
-            const isException = exceptions.some(e => article == e);
-
-            if (calendarArticle || isException) {
-                continue;
-            }
-
-            const content = await getContent(article);
-
-            const hasCalendarCategory = calendarCategories.some(e => content.includes(e));
-
-            if (!hasCalendarCategory) {
-                const useRegex = regex.test(content);
-                const usePipeRegex = pipeRegex.test(content);
-                const useTemplateRegex = templateRegex.test(content);
-
-                if (useRegex || usePipeRegex || useTemplateRegex) {
-                    selectedArticle = article;
-                    articleDict[selectedArticle!] = {
-                        text: content,
-                        regexEval: useRegex,
-                        pipeRegexEval: usePipeRegex,
-                        templateRegexEval: useTemplateRegex,
-                    };
-                }
-            }
-        }
-
-        articlesFound++;
-        bar1.update(articlesFound);
-
-        return selectedArticle;
-
     }
 
     function makeRegexGlobal(expression: RegExp): RegExp {
@@ -174,18 +266,31 @@ const dateLinkeRemoverControlPanel = (async () => {
         }
     }
 
+    async function makeEdits(): Promise<void> {
+        console.log('Editing articles...')
+        for (let article of sanitisedArray) {
+            await editArticle(article!);
+        }
+    }
+
     async function submit(): Promise<void> {
-        articlesFound = 0;
-        articleDict = {};
         exceptions = await getExceptions();
         console.log('Loading articles...');
-        articleList = await genArticleList();
+        while (true) {
+            bar1.start(100, 0);
+            while (sanitisedArray.length < 100) {
+                await genArticles();
+                await sanitiseArray();
+                bar1.update(sanitisedArray.length > 100 ? 100 : sanitisedArray.length);
+                articleArray = [];
+            }
 
-        console.log('Found 100 articles, working on removing dates...')
-        for (let article of articleList) {
-            await editArticle(article);
+            console.log("Number of articles found:", sanitisedArray.length)
+
+            await makeEdits();
+            console.log("Cleaning up and starting again...")
+            sanitisedArray = [];
         }
-        submit();
     }
 
     (async () => {

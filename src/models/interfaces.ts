@@ -14,7 +14,8 @@ export interface QueryParams {
     summary?: string,
     text?: string,
     minor?: boolean,
-    token?: string
+    token?: string,
+    rncontinue?: string
 }
 
 export interface ArticleDict {
@@ -24,4 +25,30 @@ export interface ArticleDict {
         pipeRegexEval: boolean,
         templateRegexEval: boolean
     }
+}
+
+export interface MwnOptions {
+    OAuth2AccessToken?: string,
+    OAuthCredentials?: {
+        accessSecret: string;
+        accessToken: string;
+        consumerSecret: string;
+        consumerToken: string
+    },
+    apiUrl?: string,
+    defaultParams?: any,
+    editConfig?: any,
+    maxRetries?: number,
+    password?: string,
+    retryPause?: number,
+    shutoff?: {
+        condition?: RegExp | ((text: string) => boolean);
+        intervalDuration?: number;
+        onShutoff?: (text: string) => void;
+        page?: string
+    }
+    silent?: boolean,
+    suppressAPIWarnings?: boolean,
+    userAgent?: string,
+    username?: string
 }
