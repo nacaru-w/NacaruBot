@@ -15,7 +15,11 @@ export interface QueryParams {
     text?: string,
     minor?: boolean,
     token?: string,
-    rncontinue?: string
+    rncontinue?: string,
+    generator?: string,
+    grnnamespace?: string,
+    grnlimit?: string
+    grncontinue?: string
 }
 
 export interface ArticleDict {

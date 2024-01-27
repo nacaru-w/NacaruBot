@@ -6,7 +6,7 @@ import { categories } from './categories/categories';
 const dateLinkeRemoverControlPanel = (async () => {
     let articleArray: string[] = [];
     let sanitisedArray: (string | null)[] = [];
-    let rncontinue: string = '';
+    let grncontinue: string = '';
     let exceptions: string[] = [];
     let articleDict: ArticleDict = {};
 
@@ -44,34 +44,42 @@ const dateLinkeRemoverControlPanel = (async () => {
         let params: QueryParams = {
             action: 'query',
             format: 'json',
-            list: 'random',
-            rnnamespace: '0|104',
-            rnlimit: '500',
+            formatversion: "2",
+            generator: 'random',
+            grnnamespace: '0|104',
+            grnlimit: '500',
+            prop: 'revisions',
+            rvprop: 'content',
+            rvslots: 'main',
         };
 
-        if (rncontinue) {
-            params.rncontinue = rncontinue;
+        if (grncontinue) {
+            params.grncontinue = grncontinue;
         }
 
         const result = await bot.request(params);
-        const randoms = result.query.random
-        for (let r in randoms) {
-            articleArray.push(randoms[r].title)
-        }
+        grncontinue = result.continue?.grncontinue;
+        const randoms = result.query.pages
 
-        rncontinue = result.continue?.rncontinue;
+        for (let index in randoms) {
+            const title = randoms[index].title;
+            const content = randoms[index].revisions[0].slots?.main.content;
+            const sanitisedArticle: string | null = sanitiseArticle(title, content);
+
+            if (sanitisedArticle) {
+                sanitisedArray.push(sanitisedArticle);
+            }
+
+        }
     }
 
-    async function sanitiseArticle(article: string): Promise<string | null> {
+    function sanitiseArticle(article: string, content: string): string | null {
         if (titleRegex.test(article)) {
             return null;
         }
         if (exceptions.some(e => article == e)) {
             return null;
         }
-
-        const content = await getContent(article);
-
         if (categories.some(e => content.includes(e))) {
             return null;
         }
@@ -87,27 +95,9 @@ const dateLinkeRemoverControlPanel = (async () => {
                 pipeRegexEval: usePipeRegex,
                 templateRegexEval: useTemplateRegex,
             };
-
             return article;
         }
         return null;
-    }
-
-    async function sanitiseArray(): Promise<void> {
-        let results;
-        let promiseArray = [];
-
-        for (let article of articleArray) {
-            promiseArray.push(sanitiseArticle(article));
-        }
-
-        results = await Promise.all(promiseArray);
-        let finalResult = results.flat(1);
-        let filteredFinalResult = finalResult.filter((element) => element != null)
-        for (let a of filteredFinalResult) {
-            sanitisedArray.push(a);
-        }
-
     }
 
     async function getContent(pageName: string): Promise<string> {
@@ -185,11 +175,8 @@ const dateLinkeRemoverControlPanel = (async () => {
             bar1.start(100, 0);
             while (sanitisedArray.length < 100) {
                 await genArticles();
-                await sanitiseArray();
                 bar1.update(sanitisedArray.length > 100 ? 100 : sanitisedArray.length);
-                articleArray = [];
             }
-
             console.log("Number of articles found:", sanitisedArray.length)
 
             await makeEdits();
