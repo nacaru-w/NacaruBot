@@ -4,7 +4,8 @@ export const categories: string[] = [
     "[[Categoría:Celebraciones del día",
     "[[Categoría:Efemérides no oficiales",
     "[[Categoría:Días",
-    "[[Categoría:Festividad",
+    "[[Categoría:Festividades",
     "{{Ficha de mes",
-    "{{solsticio-equinoccio}}"
+    "{{solsticio-equinoccio}}",
+    "{{Desambiguación}}"
 ]
