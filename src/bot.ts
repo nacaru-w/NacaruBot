@@ -4,9 +4,8 @@ import { categories } from './categories/categories';
 
 
 const dateLinkeRemoverControlPanel = (async () => {
-    let articleArray: string[] = [];
     let sanitisedArray: (string | null)[] = [];
-    let grncontinue: string = '';
+    let grncontinue: string;
     let exceptions: string[] = [];
     let articleDict: ArticleDict = {};
 
