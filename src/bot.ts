@@ -100,11 +100,12 @@ const dateLinkRemoverControlPanel = (async () => {
                 sanitisedArray.push(sanitisedArticle);
                 counter++;
                 bar1.update(counter < 100 ? counter : 100);
+                calls = 0;
             }
         }
 
         // Switch seeds if loading takes too long
-        if (calls > 1000) {
+        if (calls > 30) {
             grncontinue = null;
             calls = 0;
         }
@@ -178,25 +179,6 @@ const dateLinkRemoverControlPanel = (async () => {
             await editArticle(article!);
         }
     }
-
-    // async function getGrncontinue(): Promise<string> {
-    //     const result = await getContent('Usuario:NacaruBot/grncontinue.json');
-    //     return JSON.parse(result);
-    // }
-
-    // async function updateGrncontinue(grnCode: string): Promise<void> {
-    //     console.log(JSON.stringify(grnCode));
-    //     try {
-    //         await bot.save(
-    //             'Usuario:NacaruBot/grncontinue.json',
-    //             JSON.stringify(grnCode),
-    //             'Bot: actualizando código aleatorio'
-    //         );
-    //     } catch (e) {
-    //         console.log(e)
-    //     }
-
-    // }
 
     async function submit(): Promise<void> {
         exceptions = await getExceptions();
