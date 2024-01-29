@@ -5,10 +5,11 @@ import { categories } from './categories/categories';
 
 const dateLinkRemoverControlPanel = (async () => {
     let sanitisedArray: (string | null)[] = [];
-    let grncontinue: string;
+    let grncontinue: string | null;
     let exceptions: string[] = [];
     let articleDict: ArticleDict = {};
     let counter: number = 0;
+    let calls: number = 0;
 
     const cliProgress = require('cli-progress');
     const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -86,6 +87,7 @@ const dateLinkRemoverControlPanel = (async () => {
         }
 
         const result = await bot.request(params);
+        calls++;
         grncontinue = result.continue?.grncontinue;
         const randoms = result.query.pages
 
@@ -100,6 +102,13 @@ const dateLinkRemoverControlPanel = (async () => {
                 bar1.update(counter < 100 ? counter : 100);
             }
         }
+
+        // Switch seeds if loading takes too long
+        if (calls > 1000) {
+            grncontinue = null;
+            calls = 0;
+        }
+
     }
 
     async function getContent(pageName: string): Promise<string> {
@@ -204,6 +213,7 @@ const dateLinkRemoverControlPanel = (async () => {
             console.log("Cleaning up and starting again...")
             sanitisedArray = [];
             counter = 0;
+            calls = 0;
         }
     }
 
