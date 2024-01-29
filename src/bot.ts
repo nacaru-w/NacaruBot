@@ -8,6 +8,7 @@ const dateLinkeRemoverControlPanel = (async () => {
     let grncontinue: string;
     let exceptions: string[] = [];
     let articleDict: ArticleDict = {};
+    let counter: number = 0;
 
     const cliProgress = require('cli-progress');
     const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -39,39 +40,6 @@ const dateLinkeRemoverControlPanel = (async () => {
 
     console.log('Loading date-link-remover bot panel');
 
-    async function genArticles(): Promise<void> {
-        let params: QueryParams = {
-            action: 'query',
-            format: 'json',
-            formatversion: "2",
-            generator: 'random',
-            grnnamespace: '0|104',
-            grnlimit: '500',
-            prop: 'revisions',
-            rvprop: 'content',
-            rvslots: 'main',
-        };
-
-        if (grncontinue) {
-            params.grncontinue = grncontinue;
-        }
-
-        const result = await bot.request(params);
-        grncontinue = result.continue?.grncontinue;
-        const randoms = result.query.pages
-
-        for (let index in randoms) {
-            const title = randoms[index].title;
-            const content = randoms[index].revisions[0].slots?.main.content;
-            const sanitisedArticle: string | null = sanitiseArticle(title, content);
-
-            if (sanitisedArticle) {
-                sanitisedArray.push(sanitisedArticle);
-            }
-
-        }
-    }
-
     function sanitiseArticle(article: string, content: string): string | null {
         if (titleRegex.test(article)) {
             return null;
@@ -97,6 +65,39 @@ const dateLinkeRemoverControlPanel = (async () => {
             return article;
         }
         return null;
+    }
+
+    async function genArticles(): Promise<void> {
+        let params: QueryParams = {
+            action: 'query',
+            format: 'json',
+            formatversion: "2",
+            generator: 'random',
+            grnnamespace: '0|104',
+            grnlimit: '500',
+            prop: 'revisions',
+            rvprop: 'content',
+            rvslots: 'main',
+        };
+
+        if (grncontinue) {
+            params.grncontinue = grncontinue;
+        }
+
+        const result = await bot.request(params);
+        grncontinue = result.continue?.grncontinue;
+        const randoms = result.query.pages
+
+        for (let index in randoms) {
+            const title = randoms[index].title;
+            const content = randoms[index].revisions[0].slots?.main.content;
+            const sanitisedArticle: string | null = sanitiseArticle(title, content);
+            if (sanitisedArticle) {
+                sanitisedArray.push(sanitisedArticle);
+                counter++;
+            }
+
+        }
     }
 
     async function getContent(pageName: string): Promise<string> {
@@ -174,13 +175,14 @@ const dateLinkeRemoverControlPanel = (async () => {
             bar1.start(100, 0);
             while (sanitisedArray.length < 100) {
                 await genArticles();
-                bar1.update(sanitisedArray.length > 100 ? 100 : sanitisedArray.length);
             }
+            bar1.stop();
             console.log("Number of articles found:", sanitisedArray.length)
 
             await makeEdits();
             console.log("Cleaning up and starting again...")
             sanitisedArray = [];
+            counter = 0;
         }
     }
 

@@ -4,7 +4,7 @@
   "description": "",
   "main": "built/bot.js",
   "scripts": {
-    "test": "test",
+    "test": "jest",
     "compile": "tsc",
     "start": "npm run compile && node built/bot.js",
     "bot": "node built/bot.js"
@@ -17,7 +17,13 @@
     "ora": "^3.4.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.23.9",
+    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-typescript": "^7.23.3",
+    "@types/jest": "^29.5.11",
     "@types/ora": "^3.2.0",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
     "typescript": "^5.3.3"
   }
 }
