@@ -3,7 +3,7 @@ import { ArticleDict, QueryParams } from './models/interfaces';
 import { categories } from './categories/categories';
 
 
-const dateLinkeRemoverControlPanel = (async () => {
+const dateLinkRemoverControlPanel = (async () => {
     let sanitisedArray: (string | null)[] = [];
     let grncontinue: string;
     let exceptions: string[] = [];
@@ -64,6 +64,7 @@ const dateLinkeRemoverControlPanel = (async () => {
             };
             return article;
         }
+
         return null;
     }
 
@@ -74,7 +75,7 @@ const dateLinkeRemoverControlPanel = (async () => {
             formatversion: "2",
             generator: 'random',
             grnnamespace: '0|104',
-            grnlimit: '500',
+            grnlimit: '50',
             prop: 'revisions',
             rvprop: 'content',
             rvslots: 'main',
@@ -88,15 +89,16 @@ const dateLinkeRemoverControlPanel = (async () => {
         grncontinue = result.continue?.grncontinue;
         const randoms = result.query.pages
 
-        for (let index in randoms) {
-            const title = randoms[index].title;
-            const content = randoms[index].revisions[0].slots?.main.content;
-            const sanitisedArticle: string | null = sanitiseArticle(title, content);
+        for (let item of randoms) {
+            const sanitisedArticle: string | null = sanitiseArticle(
+                item.title,
+                item.revisions[0]?.slots?.main.content
+            );
             if (sanitisedArticle) {
                 sanitisedArray.push(sanitisedArticle);
                 counter++;
+                bar1.update(counter < 100 ? counter : 100);
             }
-
         }
     }
 
@@ -167,6 +169,25 @@ const dateLinkeRemoverControlPanel = (async () => {
             await editArticle(article!);
         }
     }
+
+    // async function getGrncontinue(): Promise<string> {
+    //     const result = await getContent('Usuario:NacaruBot/grncontinue.json');
+    //     return JSON.parse(result);
+    // }
+
+    // async function updateGrncontinue(grnCode: string): Promise<void> {
+    //     console.log(JSON.stringify(grnCode));
+    //     try {
+    //         await bot.save(
+    //             'Usuario:NacaruBot/grncontinue.json',
+    //             JSON.stringify(grnCode),
+    //             'Bot: actualizando código aleatorio'
+    //         );
+    //     } catch (e) {
+    //         console.log(e)
+    //     }
+
+    // }
 
     async function submit(): Promise<void> {
         exceptions = await getExceptions();
