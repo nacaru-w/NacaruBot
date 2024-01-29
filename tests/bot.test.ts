@@ -96,6 +96,7 @@ describe('Regex matches', () => {
             '[[años 1980]]',
             '[[los 60]]',
             '[[década de los 50]]',
+            '[[década del 2000]]',
             '[[40s]]',
             '[[2010s]]',
             '[[20s ]]',
