@@ -7,5 +7,6 @@ export const categories: string[] = [
     "[[Categoría:Festividades",
     "{{Ficha de mes",
     "{{solsticio-equinoccio}}",
+    "{{desambiguación}}",
     "{{Desambiguación}}"
 ]
