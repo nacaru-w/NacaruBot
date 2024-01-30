@@ -10,7 +10,6 @@ const dateLinkRemoverControlPanel = (async () => {
     let articleDict: ArticleDict = {};
     let counter: number = 0;
     let calls: number = 0;
-    let loadingMessage: string = 'Loading articles'
 
     const cliProgress = require('cli-progress');
     const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -70,13 +69,6 @@ const dateLinkRemoverControlPanel = (async () => {
         return null;
     }
 
-    function addDot(): void {
-        loadingMessage += '.';
-        if (loadingMessage == 'Loading message....') {
-            loadingMessage = 'Loading message';
-        }
-    }
-
     async function genArticles(): Promise<void> {
         let params: QueryParams = {
             action: 'query',
@@ -95,8 +87,8 @@ const dateLinkRemoverControlPanel = (async () => {
         }
 
         const result = await bot.request(params);
-        addDot();
         calls++;
+        console.log(calls);
         grncontinue = result.continue?.grncontinue;
         const randoms = result.query.pages
 
@@ -191,8 +183,8 @@ const dateLinkRemoverControlPanel = (async () => {
 
     async function submit(): Promise<void> {
         exceptions = await getExceptions();
+        console.log('Loading articles...');
         while (true) {
-            console.log(loadingMessage);
             bar1.start(100, 0);
             while (sanitisedArray.length < 100) {
                 await genArticles();
