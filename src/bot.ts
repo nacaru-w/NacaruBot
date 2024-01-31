@@ -88,7 +88,6 @@ const dateLinkRemoverControlPanel = (async () => {
 
         const result = await bot.request(params);
         calls++;
-        console.log(calls);
         grncontinue = result.continue?.grncontinue;
         const randoms = result.query.pages
 
@@ -100,7 +99,7 @@ const dateLinkRemoverControlPanel = (async () => {
             if (sanitisedArticle) {
                 sanitisedArray.push(sanitisedArticle);
                 counter++;
-                bar1.update(counter < 100 ? counter : 100);
+                bar1.update(counter * 10);
                 calls = 0;
             }
         }
@@ -186,7 +185,7 @@ const dateLinkRemoverControlPanel = (async () => {
         console.log('Loading articles...');
         while (true) {
             bar1.start(100, 0);
-            while (sanitisedArray.length < 100) {
+            while (sanitisedArray.length < 10) {
                 await genArticles();
             }
             bar1.stop();
