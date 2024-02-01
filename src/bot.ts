@@ -6,17 +6,18 @@ import { categories } from './categories/categories';
 const dateLinkRemoverControlPanel = (async () => {
     let sanitisedArray: (string | null)[] = [];
     let grncontinue: string | null;
-    let exceptions: string[] = [];
+    let exceptions: string[] | null = [];
     let articleDict: ArticleDict = {};
-    let counter: number = 0;
     let calls: number = 0;
 
     const cliProgress = require('cli-progress');
-    const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
     const { Mwn } = require('mwn');
 
     const fs = require('node:fs/promises');
     const ora = require('ora');
+
+    const bar1 = ora('Finding article...')
+    bar1.spinner = 'arrow3'
 
 
     const credentials = await fs.readFile('./credentials.json').then((data: string) => {
@@ -45,7 +46,7 @@ const dateLinkRemoverControlPanel = (async () => {
         if (titleRegex.test(article)) {
             return null;
         }
-        if (exceptions.some(e => article == e)) {
+        if (exceptions?.some(e => article == e)) {
             return null;
         }
         if (categories.some(e => content.includes(e))) {
@@ -98,8 +99,6 @@ const dateLinkRemoverControlPanel = (async () => {
             );
             if (sanitisedArticle) {
                 sanitisedArray.push(sanitisedArticle);
-                counter++;
-                bar1.update(counter * 10);
                 calls = 0;
             }
         }
@@ -132,10 +131,18 @@ const dateLinkRemoverControlPanel = (async () => {
         return botPromise;
     }
 
-    async function getExceptions(): Promise<string[]> {
-        console.log("Loading exceptions...")
-        const JSONList = await getContent('Usuario:NacaruBot/date-link-remover-control-panel/exceptions.json');
-        return JSON.parse(JSONList);
+    async function getExceptions(): Promise<string[] | null> {
+        const message = ora('Getting exceptions...').start();
+        message.color = 'blue';
+        try {
+            const JSONList = await getContent('Usuario:NacaruBot/date-link-remover-control-panel/exceptions.json');
+            message.succeed('Exceptions retrieved!');
+            return JSON.parse(JSONList);
+
+        } catch (error) {
+            message.fail(`Error retrieving exceptions: ${error}`);
+            return null
+        }
     }
 
     function makeRegexGlobal(expression: RegExp): RegExp {
@@ -174,7 +181,6 @@ const dateLinkRemoverControlPanel = (async () => {
     }
 
     async function makeEdits(): Promise<void> {
-        console.log('Editing articles...')
         for (let article of sanitisedArray) {
             await editArticle(article!);
         }
@@ -182,19 +188,16 @@ const dateLinkRemoverControlPanel = (async () => {
 
     async function submit(): Promise<void> {
         exceptions = await getExceptions();
-        console.log('Loading articles...');
         while (true) {
-            bar1.start(100, 0);
-            while (sanitisedArray.length < 10) {
+            bar1.start();
+            while (sanitisedArray.length < 1) {
                 await genArticles();
             }
             bar1.stop();
-            console.log("Number of articles found:", sanitisedArray.length)
+            console.log("Article found!");
 
             await makeEdits();
-            console.log("Cleaning up and starting again...")
             sanitisedArray = [];
-            counter = 0;
             calls = 0;
         }
     }
