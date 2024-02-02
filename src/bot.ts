@@ -46,7 +46,7 @@ const dateLinkRemoverControlPanel = (async () => {
         if (titleRegex.test(article)) {
             return null;
         }
-        if (exceptions?.some(e => article == e)) {
+        if (exceptions!.some(e => article == e)) {
             return null;
         }
         if (categories.some(e => content.includes(e))) {
@@ -188,13 +188,15 @@ const dateLinkRemoverControlPanel = (async () => {
 
     async function submit(): Promise<void> {
         exceptions = await getExceptions();
+        if (exceptions == null) {
+            return console.log('Could not load exceptions, stopping execution');
+        }
         while (true) {
             bar1.start();
             while (sanitisedArray.length < 1) {
                 await genArticles();
             }
             bar1.stop();
-            console.log("Article found!");
 
             await makeEdits();
             sanitisedArray = [];
