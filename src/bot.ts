@@ -188,6 +188,7 @@ const dateLinkRemoverControlPanel = (async () => {
 
     async function submit(): Promise<void> {
         exceptions = await getExceptions();
+        console.log('Starting search...');
         if (exceptions == null) {
             return console.log('Could not load exceptions, stopping execution');
         }
