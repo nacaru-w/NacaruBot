@@ -176,7 +176,7 @@ const dateLinkRemoverControlPanel = (async () => {
             );
             message.succeed(`Success: ${article}`);
         } catch (error) {
-            message.fail(`Failure: ${article}.The following error happened: ${error}`);
+            message.fail(`Failure: ${article}. ${error}`);
         }
     }
 
