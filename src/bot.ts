@@ -88,7 +88,7 @@ const dateLinkRemoverControlPanel = (async () => {
         }
 
         const result = await bot.request(params);
-        calls++;
+        // calls++;
         grncontinue = result.continue?.grncontinue;
         const randoms = result.query.pages
 
@@ -99,15 +99,15 @@ const dateLinkRemoverControlPanel = (async () => {
             );
             if (sanitisedArticle) {
                 sanitisedArray.push(sanitisedArticle);
-                calls = 0;
+                // calls = 0;
             }
         }
 
         // Switch seeds if loading takes too long
-        if (calls > 30) {
-            grncontinue = null;
-            calls = 0;
-        }
+        // if (calls > 30) {
+        //     grncontinue = null;
+        //     calls = 0;
+        // }
 
     }
 
