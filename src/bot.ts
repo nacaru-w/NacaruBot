@@ -135,7 +135,7 @@ const dateLinkRemoverControlPanel = (async () => {
         const message = ora('Getting exceptions...').start();
         message.color = 'blue';
         try {
-            const JSONList = await getContent('Usuario:NacaruBot/date-link-remover-control-panel/exceptions.json');
+            const JSONList = await getContent('Usuario:NacaruBot/exceptions.json');
             message.succeed('Exceptions retrieved!');
             return JSON.parse(JSONList);
 
