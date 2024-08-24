@@ -154,6 +154,17 @@ describe('Regex matches', () => {
         expect(inputArray.every(e => regex.test(e))).toBeTruthy();
     })
 
+    test('Regex should match tc templates that include dates inside', () => {
+        const inputArray = [
+            '{{tc|lunes}}',
+            '{{tc|1997}}',
+            '{{tc|Octubre}}',
+            '{{tc|8 de marzo}}',
+            '{{tc|los 70}}'
+        ];
+        expect(inputArray.every(e => regex.test(e))).toBeTruthy();
+    })
+
 })
 
 describe('pipeRegex matches', () => {
