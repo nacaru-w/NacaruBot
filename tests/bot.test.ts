@@ -160,7 +160,8 @@ describe('Regex matches', () => {
             '{{tc|1997}}',
             '{{tc|Octubre}}',
             '{{tc|8 de marzo}}',
-            '{{tc|los 70}}'
+            '{{tc|los 70}}',
+            '{{tc|Siglo XXII}}'
         ];
         expect(inputArray.every(e => regex.test(e))).toBeTruthy();
     })
