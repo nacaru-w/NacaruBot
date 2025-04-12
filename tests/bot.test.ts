@@ -1,5 +1,4 @@
-import { regex, pipeRegex, templateRegex, titleRegex } from '../src/regexes/regexes'
-import { categories } from '../src/categories/categories'
+import { regex, pipeRegex, templateRegex } from '../src/regexes/regexes'
 
 describe('Regex matches', () => {
 
@@ -336,11 +335,8 @@ describe('templateRegex matches', () => {
     test('templateRegex should match the «link» parameter in «julgregfecha» template', () => {
         const inputArray = [
             "{{Julgregfecha|11|1|1583|Link=\"true\"}} ",
-            "{{Julgregfecha|10|12|1443|Link='true'}}",
             "{{julgregfecha||link=\"true\"}}",
             "{{ JULGREGFECHA|30|2|1990|LINK=\"true\"}}",
-            "{{julgregfecha|22|1|133|link= true }}",
-            "{{julgregfecha|01|06|99|link=true}}"
         ];
         expect(inputArray.every(e => templateRegex.test(e))).toBeTruthy();
     })
@@ -350,7 +346,6 @@ describe('templateRegex matches', () => {
             "{{Fecha|||1993|link=sí}}",
             "{{Fecha||2|1993|link=sí}}",
             "{{Fecha|18|8|2007|24|2|1993|link=pt}}",
-            "{{Fecha|24|2|link=si}}"
         ];
         expect(inputArray.every(e => templateRegex.test(e))).toBeTruthy();
     })

@@ -161,7 +161,7 @@ const dateLinkRemoverControlPanel = (async () => {
         }
         if (articleDict[article].templateRegexEval) {
             const newTemplateRegex = makeRegexGlobal(templateRegex);
-            newText = newText.replace(newTemplateRegex, "$1$2");
+            newText = newText.replace(newTemplateRegex, "$1$2$3$4$5$6$7$8$9");
         }
         return newText;
     }
