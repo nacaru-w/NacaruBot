@@ -169,14 +169,17 @@ const dateLinkRemoverControlPanel = (async () => {
     async function editArticle(article: string): Promise<void> {
         const message = ora(`Editing: ${article}`).start();
         try {
-            await bot.save(
+            const response = await bot.save(
                 article,
                 replaceText(article),
                 'Bot: eliminando enlaces según [[WP:ENLACESFECHAS]]'
             );
-            message.succeed(`[${new Date().toUTCString()}] Success: ${article}`);
+            const diffUrl = response?.newrevid
+                ? `https://es.wikipedia.org/w/index.php?title=${encodeURIComponent(article.replace(/ /g, '_'))}&diff=prev&oldid=${response.newrevid}`
+                : `https://es.wikipedia.org/wiki/Special:Contributions/NacaruBot`;
+            message.succeed(`[${new Date().toUTCString()}] Success: ${article} — ${diffUrl}`);
         } catch (error) {
-            message.fail(`[${new Date().toUTCString()}] Failure: ${article}. ${error}`);
+            message.fail(`[${new Date().toUTCString()}] Failure: ${article}. ${error} — https://es.wikipedia.org/wiki/Special:Contributions/NacaruBot`);
         }
     }
 
