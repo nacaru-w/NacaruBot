@@ -174,9 +174,9 @@ const dateLinkRemoverControlPanel = (async () => {
                 replaceText(article),
                 'Bot: eliminando enlaces según [[WP:ENLACESFECHAS]]'
             );
-            message.succeed(`Success: ${article}`);
+            message.succeed(`[${new Date().toUTCString()}] Success: ${article}`);
         } catch (error) {
-            message.fail(`Failure: ${article}. ${error}`);
+            message.fail(`[${new Date().toUTCString()}] Failure: ${article}. ${error}`);
         }
     }
 
