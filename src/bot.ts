@@ -177,9 +177,11 @@ const dateLinkRemoverControlPanel = (async () => {
             const diffUrl = response?.newrevid
                 ? `https://es.wikipedia.org/w/index.php?title=${encodeURIComponent(article.replace(/ /g, '_'))}&diff=prev&oldid=${response.newrevid}`
                 : `https://es.wikipedia.org/wiki/Special:Contributions/NacaruBot`;
-            message.succeed(`[${new Date().toUTCString()}] Success: ${article} — ${diffUrl}`);
+            const link = (text: string, url: string) => `\x1b]8;;${url}\x1b\\${text}\x1b]8;;\x1b\\`;
+            message.succeed(`[${new Date().toISOString().slice(11, 19)}] ${link('Success', diffUrl)}: ${article}`);
         } catch (error) {
-            message.fail(`[${new Date().toUTCString()}] Failure: ${article}. ${error} — https://es.wikipedia.org/wiki/Special:Contributions/NacaruBot`);
+            const link = (text: string, url: string) => `\x1b]8;;${url}\x1b\\${text}\x1b]8;;\x1b\\`;
+            message.fail(`[${new Date().toISOString().slice(11, 19)}] ${link('Failure', 'https://es.wikipedia.org/wiki/Special:Contributions/NacaruBot')}: ${article}. ${error}`);
         }
     }
 
