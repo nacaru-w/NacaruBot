@@ -14,7 +14,7 @@ const dateLinkRemoverControlPanel = (async () => {
     const { Mwn } = require('mwn');
 
     const fs = require('node:fs/promises');
-    const ora = require('ora');
+    const { default: ora } = await import('ora');
 
     const bar1 = ora('Finding article...')
     bar1.spinner = 'arrow3'
