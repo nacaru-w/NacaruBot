@@ -2,6 +2,16 @@ import { regex, pipeRegex, templateRegex, titleRegex } from './regexes/regexes';
 import { ArticleDict, QueryParams } from './models/interfaces';
 import { categories } from './categories/categories';
 
+const boldEditThresholdBytes = 100;
+
+function formatByteCount(bytesRemoved: number): string {
+    const label = `${-bytesRemoved} ${bytesRemoved === 1 ? 'byte' : 'bytes'}`;
+    return process.stderr.isTTY ? `\x1b[38;5;124m${label}\x1b[39m` : label;
+}
+
+function terminalLink(label: string, url: string): string {
+    return process.stderr.isTTY ? `\x1b]8;;${url}\x1b\\${label}\x1b]8;;\x1b\\` : `${label} (${url})`;
+}
 
 const dateLinkRemoverControlPanel = (async () => {
     let sanitisedArray: (string | null)[] = [];
@@ -169,19 +179,29 @@ const dateLinkRemoverControlPanel = (async () => {
     async function editArticle(article: string): Promise<void> {
         const message = ora(`Editing: ${article}`).start();
         try {
+            const originalText = articleDict[article].text;
+            const editedText = replaceText(article);
             const response = await bot.save(
                 article,
-                replaceText(article),
+                editedText,
                 'Bot: eliminando enlaces según [[WP:ENLACESFECHAS]]'
             );
-            const diffUrl = response?.newrevid
-                ? `https://es.wikipedia.org/w/index.php?title=${encodeURIComponent(article.replace(/ /g, '_'))}&diff=prev&oldid=${response.newrevid}`
-                : `https://es.wikipedia.org/wiki/Special:Contributions/NacaruBot`;
-            const link = (text: string, url: string) => `\x1b]8;;${url}\x1b\\${text}\x1b]8;;\x1b\\`;
-            message.succeed(`[${new Date().toISOString().slice(11, 19)}] ${link('Success', diffUrl)}: ${article}`);
+            const timestamp = new Date().toISOString().slice(11, 19);
+            if (response?.nochange) {
+                message.info(`[${timestamp}] Unchanged: ${article} (${formatByteCount(0)})`);
+                return;
+            }
+            if (!response?.newrevid) {
+                message.warn(`[${timestamp}] Edit unconfirmed: ${article} (no revision ID returned)`);
+                return;
+            }
+
+            const bytesRemoved = Buffer.byteLength(originalText) - Buffer.byteLength(editedText);
+            const diff = terminalLink('diff', `https://es.wikipedia.org/w/index.php?diff=${response.newrevid}`);
+            const entry = `[${timestamp}] Success: ${article} (${formatByteCount(bytesRemoved)}) · ${diff}`;
+            message.succeed(process.stderr.isTTY && bytesRemoved >= boldEditThresholdBytes ? `\x1b[1m${entry}\x1b[22m` : entry);
         } catch (error) {
-            const link = (text: string, url: string) => `\x1b]8;;${url}\x1b\\${text}\x1b]8;;\x1b\\`;
-            message.fail(`[${new Date().toISOString().slice(11, 19)}] ${link('Failure', 'https://es.wikipedia.org/wiki/Special:Contributions/NacaruBot')}: ${article}. ${error}`);
+            message.fail(`[${new Date().toISOString().slice(11, 19)}] ${terminalLink('Failure', 'https://es.wikipedia.org/wiki/Special:Contributions/NacaruBot')}: ${article}. ${error}`);
         }
     }
 
